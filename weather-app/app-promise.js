@@ -51,28 +51,28 @@ if(argv.save) {
   configurator.saveConfig(applicationConfig)
 }
 
+var getWeatherFromAddress = async (address, apiKey) => {
+  console.log("In getWeatherFromAddress");
+  try {
+    var geocodeResult = await geocode.geocodeAddressPromise(address);
 
-geocode.geocodeAddressPromise(applicationConfig.address).then((response) => {
-  if (response.data.status === 'ZERO_RESULTS'){
-    throw new Error ('Unable to find that address');
+    if (geocodeResult.data.status === 'ZERO_RESULTS'){
+      throw new Error ('Unable to find that address');
+    }
+
+    console.log(geocodeResult.data.results[0].formatted_address);
+    var lat = geocodeResult.data.results[0].geometry.location.lat;
+    var lng = geocodeResult.data.results[0].geometry.location.lng;
+
+    var weatherResponse = await weather.getWeatherPromise(apiKey, lat, lng);
+
+    var temperature = weatherResponse.data.currently.temperature;
+    var apparentTemperature = weatherResponse.data.currently.apparentTemperature;
+    console.log(`It's currently ${temperature}. It feels like: ${apparentTemperature}.`);
+
+  } catch (e) {
+    console.log('There was an Error:', e);
   }
-  var lat = response.data.results[0].geometry.location.lat;
-  var lng = response.data.results[0].geometry.location.lng
+}
 
-  return weather.getWeatherPromise(applicationConfig.apiKey, lat, lng);
-
-}).then((response) => {
-  var temperature = response.data.currently.temperature;
-  var apparentTemperature = response.data.currently.apparentTemperature;
-
-  console.log(`It's currently ${temperature}. It feels like: ${apparentTemperature}.`);
-}).catch((e)=>{
-
-  if(e.code === 'ENOTFOUND'){
-    console.log('Unable to connect to API server');
-  } else {
-    console.log('Error: ', e.message);
-  }
-
-
-});
+getWeatherFromAddress(applicationConfig.address,applicationConfig.apiKey);
