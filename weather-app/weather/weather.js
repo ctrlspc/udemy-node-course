@@ -1,4 +1,5 @@
 const request = require('request');
+const axios = require('axios');
 
 var getWeather = (apiCode, longitude, latitude, callback) => {
 
@@ -19,4 +20,12 @@ var getWeather = (apiCode, longitude, latitude, callback) => {
   });
 }
 
-module.exports.getWeather = getWeather;
+var getWeatherPromise = (apiKey, lat,lng) => {
+  var weatherUrl = `https://api.darksky.net/forecast/${apiKey}/${lat},${lng}`
+  return axios.get(weatherUrl);
+}
+
+module.exports ={
+  getWeather,
+  getWeatherPromise
+};
